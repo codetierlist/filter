@@ -6,7 +6,7 @@ post = pandas.read_csv('post.csv')
 i = -1
 
 # Check if matching ID
-pre_utorid, post_utorid = pre['Q14'], post['Q14']
+pre_utorid, post_utorid = pre['Q14'].str.lower().str.replace(" ", ""), post['Q14'].str.lower().str.replace(" ", "")
 utorids = set(pre_utorid) & set(post_utorid)
 
 # Other filter conditions
@@ -48,4 +48,8 @@ for utorid in utorids:
     if is_finished and is_consent and is_sane1 and is_sane2 and is_valid_time:
         valid_utorids.append(utorid)
 
-pandas.DataFrame(valid_utorids, columns=['Q14']).to_csv('filtered_utorids.csv', index=False)
+filtered_pre = pre[pre_utorid.isin(valid_utorids)].groupby('Q14').last().sort_values(by='Q13').reset_index()
+filtered_post = post[post_utorid.isin(valid_utorids)].groupby('Q14').last().sort_values(by='Q13').reset_index()
+
+filtered_pre.to_csv('pre_filtered.csv', index=False)
+filtered_post.to_csv('post_filtered.csv', index=False)
